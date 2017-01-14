@@ -318,6 +318,9 @@ function warnAboutUnstableUse() {
   warned = true;
 }
 
+// TODO
+let currentRoot;
+
 function renderSubtreeIntoContainer(parentComponent : ?ReactComponent<any, any, any>, children : ReactNodeList, containerNode : DOMContainerElement | Document, callback: ?Function) {
   validateContainer(containerNode);
 
@@ -331,6 +334,7 @@ function renderSubtreeIntoContainer(parentComponent : ?ReactComponent<any, any, 
     }
     const newRoot = DOMRenderer.createContainer(container);
     root = container._reactRootContainer = newRoot;
+    currentRoot = root;
     // Initial mount should not be batched.
     DOMRenderer.unbatchedUpdates(() => {
       DOMRenderer.updateContainer(children, newRoot, parentComponent, callback);
@@ -384,5 +388,16 @@ var ReactDOM = {
   unstable_deferredUpdates: DOMRenderer.deferredUpdates,
 
 };
+
+/* globals __REACT_DEVTOOLS_GLOBAL_HOOK__*/
+if (
+  typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== 'undefined' &&
+  typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.inject === 'function') {
+  __REACT_DEVTOOLS_GLOBAL_HOOK__.inject({
+    getRoot() {
+      return currentRoot;
+    }
+  });
+}
 
 module.exports = ReactDOM;
